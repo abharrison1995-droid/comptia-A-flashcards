@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>CompTIA A+ Flashcards</title>
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface2: #f2f2f2;
+    --border: rgba(0,0,0,0.1);
+    --text: #1c1c1e;
+    --text2: #636366;
+    --text3: #aeaeb2;
+    --blue: #007aff;
+    --green: #34c759;
+    --orange: #ff9500;
+    --red: #ff3b30;
+    --purple: #5856d6;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1e;
+      --surface: #2c2c2e;
+      --surface2: #3a3a3c;
+      --border: rgba(255,255,255,0.1);
+      --text: #f2f2f7;
+      --text2: #aeaeb2;
+      --text3: #636366;
+      --shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  
+  /* SCREENS */
+  .screen { display: none; flex-direction: column; min-height: 100vh; }
+  .screen.active { display: flex; }
+  
+  /* NAV */
+  .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; }
+  .topbar h1 { font-size: 17px; font-weight: 600; flex: 1; }
+  .topbar .back-btn { font-size: 15px; color: var(--blue); background: none; border: none; padding: 4px 0; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .topbar .back-btn svg { width: 8px; height: 14px; fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  
+  /* HOME */
+  .home-header { background: var(--surface); padding: 24px 16px 16px; border-bottom: 0.5px solid var(--border); }
+  .home-header h1 { font-size: 28px; font-weight: 700; }
+  .home-header p { font-size: 14px; color: var(--text2); margin-top: 4px; }
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 16px; }
+  .stat-card { background: var(--surface); border-radius: var(--radius-sm); padding: 12px; text-align: center; border: 0.5px solid var(--border); }
+  .stat-card .num { font-size: 22px; font-weight: 700; }
+  .stat-card .lbl { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .stat-card .num.green { color: var(--green); }
+  .stat-card .num.orange { color: var(--orange); }
+  .stat-card .num.blue { color: var(--blue); }
+  
+  /* CORE SECTION */
+  .section-header { padding: 8px 16px 4px; font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .card-list { padding: 0 16px; display: flex; flex-direction: column; gap: 1px; margin-bottom: 16px; }
+  .list-item { background: var(--surface); display: flex; align-items: center; padding: 13px 14px; cursor: pointer; border: 0.5px solid var(--border); border-radius: 0; transition: background 0.15s; }
+  .list-item:first-child { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+  .list-item:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+  .list-item:only-child { border-radius: var(--radius-sm); }
+  .list-item:active { background: var(--surface2); }
+  .list-item .item-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; margin-right: 12px; flex-shrink: 0; }
+  .list-item .item-text { flex: 1; min-width: 0; }
+  .list-item .item-title { font-size: 15px; font-weight: 500; }
+  .list-item .item-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+  .list-item .chevron { color: var(--text3); font-size: 13px; margin-left: 6px; }
+  .list-item .badge { font-size: 11px; padding: 2px 7px; border-radius: 10px; margin-right: 6px; font-weight: 500; }
+  .badge-due { background: rgba(255,59,48,0.12); color: var(--red); }
+  .badge-new { background: rgba(0,122,255,0.12); color: var(--blue); }
+  .badge-done { background: rgba(52,199,89,0.12); color: var(--green); }
+  
+  /* TOPIC SCREEN */
+  .topic-list { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .topic-card { background: var(--surface); border-radius: var(--radius); padding: 14px 16px; border: 0.5px solid var(--border); cursor: pointer; display: flex; align-items: center; gap: 12px; }
+  .topic-card:active { opacity: 0.7; }
+  .topic-card .tc-icon { font-size: 22px; width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .topic-card .tc-text { flex: 1; }
+  .topic-card .tc-title { font-size: 15px; font-weight: 600; }
+  .topic-card .tc-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .topic-card .tc-right { text-align: right; }
+  .progress-ring { width: 36px; height: 36px; flex-shrink: 0; }
+  
+  /* FLASHCARD SCREEN */
+  .flashcard-area { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 12px; }
+  .card-counter { text-align: center; font-size: 13px; color: var(--text2); padding: 4px 0; }
+  .progress-bar { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width 0.3s; }
+  
+  .flashcard { flex: 1; perspective: 1000px; min-height: 300px; cursor: pointer; }
+  .card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.45s cubic-bezier(0.4,0,0.2,1); border-radius: var(--radius); }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: var(--radius); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 24px; box-shadow: var(--shadow); }
+  .card-front { background: var(--surface); border: 0.5px solid var(--border); }
+  .card-back { background: var(--surface); border: 0.5px solid var(--border); transform: rotateY(180deg); }
+  .card-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); margin-bottom: 16px; }
+  .card-question { font-size: 19px; font-weight: 600; text-align: center; line-height: 1.4; }
+  .card-answer { font-size: 17px; font-weight: 500; text-align: center; line-height: 1.5; color: var(--text); }
+  .card-detail { font-size: 13px; color: var(--text2); text-align: center; margin-top: 12px; line-height: 1.5; }
+  .tap-hint { font-size: 12px; color: var(--text3); margin-top: 20px; }
+  
+  .rating-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding-bottom: 8px; }
+  .rating-btn { padding: 14px 8px; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; transition: transform 0.1s, opacity 0.1s; line-height: 1.3; }
+  .rating-btn:active { transform: scale(0.96); opacity: 0.8; }
+  .btn-hard { background: rgba(255,59,48,0.12); color: var(--red); }
+  .btn-ok { background: rgba(255,149,0,0.12); color: var(--orange); }
+  .btn-easy { background: rgba(52,199,89,0.12); color: var(--green); }
+  .rating-hidden { display: none; }
+  
+  /* QUIZ DONE */
+  .done-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; gap: 16px; }
+  .done-emoji { font-size: 64px; }
+  .done-title { font-size: 24px; font-weight: 700; }
+  .done-sub { font-size: 15px; color: var(--text2); line-height: 1.5; }
+  .done-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin: 8px 0; }
+  .done-stat { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
+  .done-stat-num { font-size: 28px; font-weight: 700; }
+  .done-stat-lbl { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  
+  .btn-primary { background: var(--blue); color: #fff; border: none; border-radius: var(--radius-sm); padding: 14px 24px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; margin-top: 4px; }
+  .btn-primary:active { opacity: 0.8; }
+  .btn-secondary { background: var(--surface); color: var(--blue); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 24px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; margin-top: 4px; }
+  .btn-secondary:active { background: var(--surface2); }
+  
+  /* MODE SELECTOR */
+  .mode-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
+  .mode-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px 12px; cursor: pointer; text-align: center; }
+  .mode-card:active { opacity: 0.7; }
+  .mode-icon { font-size: 28px; margin-bottom: 6px; }
+  .mode-title { font-size: 14px; font-weight: 600; }
+  .mode-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .scroll-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 32px; }
+</style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div class="screen active" id="screen-home">
+  <div class="home-header">
+    <h1>CompTIA A+</h1>
+    <p>220-1201 Core 1 &amp; 220-1202 Core 2</p>
+  </div>
+  <div class="scroll-content">
+    <div class="stats-row">
+      <div class="stat-card"><div class="num blue" id="stat-total">0</div><div class="lbl">Total Cards</div></div>
+      <div class="stat-card"><div class="num green" id="stat-learned">0</div><div class="lbl">Learned</div></div>
+      <div class="stat-card"><div class="num orange" id="stat-due">0</div><div class="lbl">Due Today</div></div>
+    </div>
+    <div class="section-header">Core 1 — 220-1201</div>
+    <div class="card-list" id="core1-list"></div>
+    <div class="section-header">Core 2 — 220-1202</div>
+    <div class="card-list" id="core2-list"></div>
+    <div style="padding: 16px;">
+      <div class="section-header" style="padding: 0 0 8px;">Study modes</div>
+      <div class="mode-row" style="padding: 0; margin-bottom: 10px;">
+        <div class="mode-card" onclick="startAllDue()"><div class="mode-icon">🔁</div><div class="mode-title">Study due</div><div class="mode-sub">Spaced repetition</div></div>
+        <div class="mode-card" onclick="startAllCards()"><div class="mode-icon">⚡</div><div class="mode-title">Quick drill</div><div class="mode-sub">All cards shuffled</div></div>
+      </div>
+      <div class="mode-row" style="padding: 0;">
+        <div class="mode-card" onclick="resetAllProgress()"><div class="mode-icon">🔄</div><div class="mode-title">Reset</div><div class="mode-sub">Clear all progress</div></div>
+        <div class="mode-card" onclick="showWeak()"><div class="mode-icon">📍</div><div class="mode-title">Weak cards</div><div class="mode-sub">Most missed</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOPIC SCREEN -->
+<div class="screen" id="screen-topic">
+  <div class="topbar">
+    <button class="back-btn" onclick="goHome()"><svg viewBox="0 0 8 14"><polyline points="7,1 1,7 7,13"/></svg> Back</button>
+    <h1 id="topic-title">Topics</h1>
+  </div>
+  <div class="scroll-content">
+    <div class="topic-list" id="topic-list"></div>
+  </div>
+</div>
+
+<!-- FLASHCARD SCREEN -->
+<div class="screen" id="screen-card">
+  <div class="topbar">
+    <button class="back-btn" id="card-back-btn" onclick="goBackFromCard()"><svg viewBox="0 0 8 14"><polyline points="7,1 1,7 7,13"/></svg> <span id="card-back-label">Back</span></button>
+    <h1 id="card-deck-title">Deck</h1>
+  </div>
+  <div class="flashcard-area">
+    <div class="card-counter" id="card-counter">Card 1 of 20</div>
+    <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill" style="width:5%"></div></div>
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="card-inner" id="card-inner">
+        <div class="card-face card-front">
+          <div class="card-label">Question</div>
+          <div class="card-question" id="card-q"></div>
+          <div class="tap-hint">Tap to reveal</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-label">Answer</div>
+          <div class="card-answer" id="card-a"></div>
+          <div class="card-detail" id="card-d"></div>
+        </div>
+      </div>
+    </div>
+    <div class="rating-buttons rating-hidden" id="rating-buttons">
+      <button class="rating-btn btn-hard" onclick="rateCard(1)">❌<br>Hard<br><span style="font-weight:400;font-size:11px;">Review soon</span></button>
+      <button class="rating-btn btn-ok" onclick="rateCard(3)">😐<br>OK<br><span style="font-weight:400;font-size:11px;">2 days</span></button>
+      <button class="rating-btn btn-easy" onclick="rateCard(5)">✅<br>Easy<br><span style="font-weight:400;font-size:11px;">Next week</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- DONE SCREEN -->
+<div class="screen" id="screen-done">
+  <div class="topbar">
+    <button class="back-btn" onclick="goHome()"><svg viewBox="0 0 8 14"><polyline points="7,1 1,7 7,13"/></svg> Home</button>
+    <h1>Session complete</h1>
+  </div>
+  <div class="done-screen">
+    <div class="done-emoji">🎉</div>
+    <div class="done-title" id="done-title">Nicely done!</div>
+    <div class="done-sub" id="done-sub">You've finished this deck.</div>
+    <div class="done-stats">
+      <div class="done-stat"><div class="done-stat-num green" id="done-easy">0</div><div class="done-stat-lbl">Easy</div></div>
+      <div class="done-stat"><div class="done-stat-num orange" id="done-ok">0</div><div class="done-stat-lbl">OK</div></div>
+      <div class="done-stat"><div class="done-stat-num red" id="done-hard">0</div><div class="done-stat-lbl">Hard</div></div>
+      <div class="done-stat"><div class="done-stat-num blue" id="done-total-s">0</div><div class="done-stat-lbl">Total reviewed</div></div>
+    </div>
+    <button class="btn-primary" id="done-again-btn" onclick="repeatMissed()">Study missed cards again</button>
+    <button class="btn-secondary" onclick="goHome()">Back to home</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CARD DATA
+// ============================================================
+const DECKS = {
+  "core1": {
+    label: "Core 1",
+    color: "#007aff",
+    bg: "rgba(0,122,255,0.12)",
+    icon: "🖧",
+    topics: {
+      "ports-protocols": {
+        title: "Ports & Protocols",
+        icon: "🔌",
+        cards: [
+          {q:"FTP",a:"File Transfer Protocol",d:"Port 20 (data), 21 (control). Unsecured file transfer."},
+          {q:"SFTP",a:"SSH File Transfer Protocol",d:"Port 22. Secure encrypted file transfer."},
+          {q:"SSH",a:"Secure Shell",d:"Port 22. Encrypted remote terminal access."},
+          {q:"Telnet",a:"Teletype Network",d:"Port 23. Unencrypted remote terminal — legacy, avoid."},
+          {q:"SMTP",a:"Simple Mail Transfer Protocol",d:"Port 25. Sends outgoing email between mail servers."},
+          {q:"DNS",a:"Domain Name System",d:"Port 53. Resolves domain names to IP addresses. TCP/UDP."},
+          {q:"DHCP",a:"Dynamic Host Configuration Protocol",d:"Ports 67/68. Auto-assigns IP addresses. UDP."},
+          {q:"HTTP",a:"HyperText Transfer Protocol",d:"Port 80. Unsecured web browsing."},
+          {q:"HTTPS",a:"HTTP Secure",d:"Port 443. Encrypted web browsing using TLS."},
+          {q:"POP3",a:"Post Office Protocol v3",d:"Port 110. Downloads email from server and (usually) deletes from server."},
+          {q:"IMAP",a:"Internet Message Access Protocol",d:"Port 143. Reads email from server, keeps email on server."},
+          {q:"SMB",a:"Server Message Block",d:"Port 445. Windows file/printer sharing."},
+          {q:"SNMP",a:"Simple Network Management Protocol",d:"Port 161/162. Monitors and manages network devices."},
+          {q:"LDAP",a:"Lightweight Directory Access Protocol",d:"Port 389. Directory services (user/group lookups). LDAPS = port 636."},
+          {q:"RDP",a:"Remote Desktop Protocol",d:"Port 3389. Remote graphical desktop access (Windows)."},
+          {q:"SQL Server",a:"Microsoft SQL default port",d:"Port 1433. Default port for MS SQL Server connections."},
+          {q:"What port does HTTPS use?",a:"443",d:"TLS-encrypted web traffic. HTTP uses port 80."},
+          {q:"What port does RDP use?",a:"3389",d:"Remote Desktop Protocol — Windows remote GUI."},
+          {q:"What port does SMTP use?",a:"25",d:"Simple Mail Transfer Protocol for sending email."},
+          {q:"SMTP Submission port",a:"587",d:"Used by mail clients to submit email (auth required). Port 465 = SMTPS (legacy)."},
+          {q:"NetBIOS",a:"Network Basic Input/Output System",d:"Ports 137–139. Legacy Windows name resolution and file sharing."},
+          {q:"SLP",a:"Service Location Protocol",d:"Port 427. Network service discovery."},
+          {q:"AFP",a:"Apple Filing Protocol",d:"Port 548. Apple file sharing (legacy macOS)."},
+          {q:"What protocol resolves MAC addresses from IP addresses?",a:"ARP — Address Resolution Protocol",d:"Works at Layer 2/3 boundary. Broadcast-based on local subnet."},
+        ]
+      },
+      "networking-concepts": {
+        title: "Networking Concepts",
+        icon: "🌐",
+        cards: [
+          {q:"OSI Layer 1",a:"Physical",d:"Cables, voltages, radio signals, hubs, repeaters."},
+          {q:"OSI Layer 2",a:"Data Link",d:"MAC addresses, switches, frames, Ethernet."},
+          {q:"OSI Layer 3",a:"Network",d:"IP addresses, routers, packets."},
+          {q:"OSI Layer 4",a:"Transport",d:"TCP (reliable) and UDP (fast). Ports live here."},
+          {q:"OSI Layer 5",a:"Session",d:"Establishes, manages, terminates sessions."},
+          {q:"OSI Layer 6",a:"Presentation",d:"Encryption, compression, data format translation."},
+          {q:"OSI Layer 7",a:"Application",d:"End-user protocols: HTTP, FTP, SMTP, DNS."},
+          {q:"TCP vs UDP",a:"TCP = reliable, ordered. UDP = fast, no guarantee.",d:"TCP has handshake and ACKs. UDP is best for streaming, VoIP, gaming."},
+          {q:"IPv4 address size",a:"32-bit, written as 4 octets",d:"Example: 192.168.1.100. ~4.3 billion addresses total."},
+          {q:"IPv6 address size",a:"128-bit, written as 8 hex groups",d:"Example: 2001:0db8::1. Virtually unlimited addresses."},
+          {q:"Private IP ranges",a:"10.x.x.x / 172.16–31.x.x / 192.168.x.x",d:"Not routable on public internet. NAT translates to public IP."},
+          {q:"Default gateway",a:"The router IP on your local subnet",d:"Traffic bound for outside the subnet is sent to the default gateway."},
+          {q:"Subnet mask /24",a:"255.255.255.0",d:"256 addresses, 254 usable hosts. Most common home/small office subnet."},
+          {q:"What is NAT?",a:"Network Address Translation",d:"Maps private IPs to a public IP. Conserves IPv4 addresses. Done by router."},
+          {q:"What is a VLAN?",a:"Virtual Local Area Network",d:"Logically segments a network within the same physical switch. Tagged via 802.1Q."},
+          {q:"What is DNS used for?",a:"Resolving domain names to IP addresses",d:"Your PC asks DNS 'what IP is google.com?' DNS answers '142.250.x.x'."},
+          {q:"What does DHCP assign?",a:"IP address, subnet mask, default gateway, DNS server",d:"DHCP scope defines the IP range to hand out. Lease time controls how long."},
+          {q:"Loopback address",a:"127.0.0.1 (IPv4) or ::1 (IPv6)",d:"Used to test the local network stack. Packets never leave the machine."},
+          {q:"APIPA range",a:"169.254.0.0/16",d:"Automatic Private IP Addressing — assigned when DHCP fails. Not routable."},
+          {q:"What is a MAC address?",a:"48-bit hardware address burned into a NIC",d:"Written as 6 hex pairs: AA:BB:CC:DD:EE:FF. First 3 pairs = vendor (OUI)."},
+          {q:"Half vs Full Duplex",a:"Half = one direction at a time. Full = both simultaneously.",d:"Old hubs = half duplex. Modern switches support full duplex. Mismatch causes collisions."},
+          {q:"What does a switch do?",a:"Forwards frames between devices using MAC address table",d:"Learns MACs from traffic. More intelligent than a hub."},
+          {q:"What does a hub do?",a:"Broadcasts all traffic to all ports",d:"Layer 1 device. Creates one collision domain. Mostly obsolete."},
+          {q:"What is QoS?",a:"Quality of Service — prioritises certain traffic types",d:"E.g. VoIP packets get higher priority than file downloads."},
+          {q:"802.11 standards summary",a:"a=5GHz, b/g=2.4GHz, n=both, ac=5GHz fast, ax(Wi-Fi 6)=both",d:"Exam focus: 802.11ac and ax for modern networks."},
+        ]
+      },
+      "cables-connectors": {
+        title: "Cables & Connectors",
+        icon: "🔗",
+        cards: [
+          {q:"Cat5e cable",a:"Up to 1 Gbps, 100m, 100 MHz",d:"Enhanced Cat5. Most common for gigabit ethernet in older installations."},
+          {q:"Cat6 cable",a:"Up to 10 Gbps (short runs), 250 MHz",d:"Better shielding than Cat5e. Thicker wire. Good for new installs."},
+          {q:"Cat6a cable",a:"Up to 10 Gbps at 100m, 500 MHz",d:"Augmented Cat6. Supports 10GbE at full distance."},
+          {q:"Coaxial cable",a:"RG-6 (cable TV/internet), RG-59 (older CCTV)",d:"Centre conductor + shield. Used in cable modem installs."},
+          {q:"Fibre optic — single-mode",a:"Long distance, laser light, yellow jacket",d:"SMF: up to 100+ km. Used in WANs and telecoms."},
+          {q:"Fibre optic — multimode",a:"Shorter distance, LED light, orange/aqua jacket",d:"MMF: up to ~2km. Used in data centres."},
+          {q:"RJ-45",a:"8-pin connector used for Ethernet",d:"Cat5e/Cat6 cables terminate in RJ-45. 'Registered Jack'."},
+          {q:"RJ-11",a:"6-pin (4-pin used) connector for telephone",d:"Smaller than RJ-45. Used in DSL and analogue phone lines."},
+          {q:"T568A vs T568B",a:"Two wiring standards for RJ-45",d:"T568B most common in the US. Straight-through = both ends same. Crossover = A one end, B other."},
+          {q:"LC connector",a:"Small square fibre connector, push-pull latch",d:"'Lucent Connector'. Very common in modern fibre installs. Pairs in duplex."},
+          {q:"SC connector",a:"Square fibre connector, push-pull",d:"'Standard Connector'. Older, larger than LC. Still common."},
+          {q:"ST connector",a:"Bayonet-lock fibre connector, round",d:"'Straight Tip'. Older style, twist-lock. Common in older installs."},
+          {q:"USB-A",a:"Rectangular USB host connector",d:"The classic 'large' USB. Found on computers as the host port."},
+          {q:"USB-B",a:"Square USB device connector",d:"Found on printers and older devices. 'Upstream' connector."},
+          {q:"USB-C",a:"Oval reversible USB connector",d:"USB 3.1/3.2/4. Supports power, data, video. Reversible."},
+          {q:"USB 2.0 speed",a:"480 Mbps (High Speed)",d:"Very common. Found on most devices. Charge rate typically 2.5W."},
+          {q:"USB 3.0 speed",a:"5 Gbps (SuperSpeed)",d:"Blue port colour. Also called USB 3.1 Gen 1. 900mA charging."},
+          {q:"USB 3.1 Gen 2",a:"10 Gbps (SuperSpeed+)",d:"Often paired with USB-C. 100W charging with USB PD."},
+          {q:"DisplayPort",a:"Video connector with clip latch, PC-native",d:"Supports high refresh rates and daisy chaining. Mini-DP also common."},
+          {q:"HDMI",a:"Home video/monitor connector — no clip",d:"Common on TVs, monitors, laptops. Carries audio + video."},
+          {q:"DVI-D",a:"Digital-only DVI",d:"No analogue pins. Compatible with HDMI via passive adapter."},
+          {q:"DVI-I",a:"Digital + Analogue DVI",d:"Has 4 extra analogue pins. Can output to VGA via adapter."},
+          {q:"VGA connector",a:"15-pin D-sub analogue video",d:"Blue, 3 rows of 5 pins. Analogue only. Legacy but still on projectors."},
+          {q:"Thunderbolt 3/4",a:"40 Gbps, uses USB-C connector",d:"Made by Intel. Supports PCIe tunnelling, daisy chain up to 6 devices."},
+          {q:"eSATA",a:"External SATA connector",d:"Uses standard SATA protocol externally. No power over cable — needs separate power."},
+          {q:"Plenum-rated cable",a:"Fire-resistant cable for use in air-handling spaces",d:"Required by code in ceilings/raised floors used for HVAC. Lower smoke toxicity."},
+        ]
+      },
+      "storage": {
+        title: "Storage Technologies",
+        icon: "💾",
+        cards: [
+          {q:"SATA speed generations",a:"SATA I=1.5Gbps, SATA II=3Gbps, SATA III=6Gbps",d:"Most modern drives and SSDs use SATA III. Backwards compatible."},
+          {q:"HDD vs SSD — key differences",a:"HDD: mechanical, cheap/GB, slower. SSD: flash, fast, more expensive.",d:"SSDs have no moving parts — more shock resistant. HDDs still win on $/GB."},
+          {q:"NVMe",a:"Non-Volatile Memory Express — PCIe-connected SSD protocol",d:"Much faster than SATA SSD. M.2 form factor most common. Latency near DRAM."},
+          {q:"M.2 form factors",a:"M.2 2242, 2260, 2280 (most common), 22110",d:"First digits = width (22mm), last digits = length. Check motherboard slot size."},
+          {q:"M.2 keying — B vs M vs B+M",a:"M-key = NVMe or SATA. B-key = SATA. B+M key = SATA SSD.",d:"An M-key slot accepts M-key or B+M drives. Check spec before buying."},
+          {q:"RAID 0",a:"Striping — speed, no redundancy",d:"Data split across 2+ drives. Fast reads/writes. If one fails, all data lost."},
+          {q:"RAID 1",a:"Mirroring — redundancy, no speed gain",d:"Exact copy on 2 drives. Survives one drive failure. Usable = 50% of total."},
+          {q:"RAID 5",a:"Striping with parity — 3+ drives, survives 1 failure",d:"Good balance of speed, capacity, and redundancy. Parity distributed across drives."},
+          {q:"RAID 10",a:"RAID 1+0 — mirror pairs then stripe",d:"Needs 4+ drives. Fast and redundant. Can lose one drive per mirrored pair."},
+          {q:"mSATA",a:"Mini-SATA — small SATA SSD for laptops",d:"Different from M.2. Older standard. Used in ThinkPads, older ultrabooks."},
+          {q:"RPM options for HDDs",a:"5400 RPM (laptop/quiet) vs 7200 RPM (desktop/server)",d:"Higher RPM = faster sequential and random access. More heat and noise."},
+          {q:"What is SAS?",a:"Serial Attached SCSI — enterprise storage interface",d:"Faster and more reliable than SATA. Used in servers. SAS drives can use SATA backplanes."},
+          {q:"Hot-swappable storage",a:"Can be connected/disconnected without powering down",d:"eSATA and USB support hot swap. Internal SATA typically does not (without hot-swap bays)."},
+        ]
+      },
+      "ram-memory": {
+        title: "RAM & Memory",
+        icon: "🧠",
+        cards: [
+          {q:"DDR4 vs DDR5",a:"DDR5 = faster, lower voltage, dual-channel per DIMM",d:"DDR5 starts ~3200 MT/s, DDR4 typically 2133–3200 MT/s. Not physically compatible."},
+          {q:"DIMM",a:"Dual Inline Memory Module — desktop RAM",d:"168–288 pins depending on generation. DDR4/5 DIMM = 288 pins."},
+          {q:"SO-DIMM",a:"Small Outline DIMM — laptop/compact RAM",d:"About half the length of DIMM. Same data path, different physical size."},
+          {q:"ECC RAM",a:"Error-Correcting Code — detects and corrects single-bit errors",d:"Used in servers and workstations. More expensive. Requires ECC-capable CPU/motherboard."},
+          {q:"Dual-channel memory",a:"Two matched sticks accessed simultaneously for doubled bandwidth",d:"Install in matching colour slots. Check motherboard manual for correct slots."},
+          {q:"RAM speed — MT/s vs MHz",a:"MT/s = megatransfers per second. DDR doubles effective rate vs clock.",d:"DDR4-3200 = 1600 MHz base clock, 3200 MT/s effective. Labels usually show MT/s."},
+          {q:"What happens if you mix RAM speeds?",a:"System runs all sticks at the speed of the slowest",d:"May also cause instability. Best practice: match speed, timings, and manufacturer."},
+          {q:"Virtual memory / paging file",a:"Hard drive space used as overflow RAM",d:"Slower than RAM. Windows calls it 'paging file'. On SSD it's faster but still much slower than RAM."},
+          {q:"Cache memory (L1/L2/L3)",a:"Very fast CPU-integrated memory tiers",d:"L1 = fastest/smallest (per core). L2 = medium. L3 = largest, shared across cores."},
+        ]
+      },
+      "cpu-motherboard": {
+        title: "CPUs & Motherboards",
+        icon: "⚙️",
+        cards: [
+          {q:"CPU socket types — Intel",a:"LGA (Land Grid Array) — pins on motherboard socket",d:"Examples: LGA1700 (12th/13th gen Intel). Pins in socket, flat contacts on CPU."},
+          {q:"CPU socket types — AMD",a:"AM4, AM5 — PGA (pins on CPU) or LGA",d:"AM4 = pins on CPU (PGA). AM5 = LGA like Intel (no pins on CPU)."},
+          {q:"Thermal paste purpose",a:"Fills microscopic gaps between CPU and heatsink",d:"Without it, air gaps reduce thermal conductivity dramatically. Apply thin, even layer."},
+          {q:"PCIe x1 vs x4 vs x8 vs x16",a:"x number = number of lanes. More lanes = more bandwidth.",d:"GPU = x16. NVMe = x4. Network cards = x1 or x4. Physically longer slots have more lanes."},
+          {q:"PCIe generations",a:"PCIe 3.0 = 1GB/s per lane. PCIe 4.0 = 2GB/s. PCIe 5.0 = 4GB/s",d:"NVMe drives labeled PCIe 4.0 x4 = up to 8 GB/s theoretical."},
+          {q:"ATX vs Micro-ATX vs Mini-ITX",a:"ATX = full size. mATX = smaller. Mini-ITX = smallest.",d:"More slots and expansion on ATX. Mini-ITX has 1 PCIe slot. All mount to cases appropriately."},
+          {q:"BIOS vs UEFI",a:"BIOS = legacy 16-bit. UEFI = modern, 32/64-bit with GUI.",d:"UEFI supports drives >2TB (GPT), secure boot, faster POST, mouse support."},
+          {q:"POST",a:"Power-On Self Test",d:"Run by BIOS/UEFI at startup. Checks CPU, RAM, GPU, storage. Beep codes indicate errors."},
+          {q:"CMOS battery",a:"CR2032 coin cell — maintains BIOS settings when power off",d:"If dead: date/time resets, BIOS settings lost. Replace with cheap CR2032."},
+          {q:"Hyper-Threading (Intel) / SMT (AMD)",a:"Each physical core appears as 2 logical cores to OS",d:"Improves multitasking. A 6-core CPU with HT shows 12 logical processors in Task Manager."},
+          {q:"Overclocking",a:"Running CPU/RAM above rated specification",d:"Requires unlocked CPU (Intel K-series, AMD Ryzen X), good cooler, motherboard support."},
+          {q:"CPU TDP",a:"Thermal Design Power — heat a cooler must dissipate (Watts)",d:"A 65W TDP CPU needs a cooler rated at 65W+. Stock coolers usually adequate for base TDP."},
+        ]
+      },
+      "display-video": {
+        title: "Display & Video",
+        icon: "🖥️",
+        cards: [
+          {q:"LCD types — IPS vs TN vs VA",a:"IPS = best colour/viewing angles. TN = fastest response. VA = best contrast.",d:"IPS for design/general use. TN for competitive gaming. VA for movies."},
+          {q:"OLED displays",a:"Each pixel self-illuminates — true blacks, infinite contrast",d:"No backlight needed. Risk of burn-in with static images. Common on phones and high-end monitors."},
+          {q:"Display resolution terms",a:"HD=1280×720, FHD=1920×1080, QHD=2560×1440, 4K=3840×2160",d:"Higher resolution = more pixels = sharper image but more GPU demand."},
+          {q:"Refresh rate",a:"Hz = frames per second the monitor can display",d:"60Hz = standard. 144Hz+ for gaming. Match to GPU frame rate for best experience."},
+          {q:"VGA signal type",a:"Analogue",d:"15-pin D-sub. Old technology. Max 2048×1536 theoretically but quality degrades."},
+          {q:"Backlights in LCD",a:"CCFL (older) vs LED (modern)",d:"LED backlights are thinner, more efficient, last longer. Most LCDs since ~2010 use LED backlight."},
+          {q:"Inverter in LCD",a:"Converts DC to AC to power CCFL backlight",d:"CCFL displays only. Failure = screen very dim or dark. Not needed in LED-backlit displays."},
+          {q:"Pixel pitch",a:"Distance between centre of adjacent pixels",d:"Smaller pitch = sharper image at given size. Important for large displays viewed close up."},
+        ]
+      },
+      "printers": {
+        title: "Printers",
+        icon: "🖨️",
+        cards: [
+          {q:"Laser printer process — step 1",a:"Processing — data sent to printer, raster image created",d:"Also called 'RIPping'. Converts print data into a dot matrix."},
+          {q:"Laser printer process — step 2",a:"Charging — drum coated with uniform negative charge",d:"Primary corona wire or charge roller applies -600V to drum."},
+          {q:"Laser printer process — step 3",a:"Exposing — laser writes image onto drum",d:"Laser neutralises charge where toner should stick, creating latent image."},
+          {q:"Laser printer process — step 4",a:"Developing — toner attracted to charged areas on drum",d:"Toner hopper and developer roller apply toner to latent image on drum."},
+          {q:"Laser printer process — step 5",a:"Transferring — toner moved from drum to paper",d:"Transfer corona/roller applies positive charge to paper, attracting negatively charged toner."},
+          {q:"Laser printer process — step 6",a:"Fusing — heat and pressure bonds toner to paper",d:"Fuser assembly melts toner. Paper exits warm. Fuser causes most heat/jam issues."},
+          {q:"Laser printer process — step 7",a:"Cleaning — residual toner removed from drum",d:"Cleaning blade scrapes remaining toner. Drum ready for next page."},
+          {q:"Inkjet printing",a:"Sprays microscopic ink droplets onto paper",d:"Thermal (heat bubble) or piezoelectric (pressure) methods. Better colour than laser for photos."},
+          {q:"Thermal printer",a:"Heat-sensitive paper, no ink/toner",d:"Used in receipts and labels. Paper darkens with heat. Two types: direct thermal and thermal transfer."},
+          {q:"Impact/dot matrix printer",a:"Pins strike ribbon to create characters",d:"Still used for multi-part forms (carbon copies). Loud. Slow. Reliable for invoices."},
+          {q:"Duplex printing",a:"Printing on both sides of paper",d:"Automatic duplex unit feeds paper back through. Saves paper. Check if printer has the unit."},
+          {q:"Printer spooler",a:"Windows service that queues print jobs",d:"Spooler service: 'Print Spooler'. If stuck jobs persist, clear C:\\Windows\\System32\\spool\\PRINTERS\\"},
+        ]
+      },
+      "mobile-devices": {
+        title: "Mobile & IoT",
+        icon: "📱",
+        cards: [
+          {q:"MDM",a:"Mobile Device Management",d:"Software to centrally manage, configure, and enforce policy on mobile devices."},
+          {q:"BYOD",a:"Bring Your Own Device",d:"Policy allowing personal devices on corporate network. Introduces security challenges."},
+          {q:"Accelerometer",a:"Detects orientation and movement",d:"Used for screen rotation, step counting, shake gestures."},
+          {q:"Gyroscope",a:"Detects rotational motion",d:"More precise than accelerometer for 3D orientation. Used in AR, gaming."},
+          {q:"GPS",a:"Global Positioning System",d:"Uses satellite signals to determine location. High battery drain."},
+          {q:"NFC",a:"Near Field Communication",d:"Short range (~4cm), contactless data/payment. Used in Apple Pay, Google Pay, key cards."},
+          {q:"Bluetooth pairing",a:"PIN/passkey or NFC tap to establish trusted connection",d:"Bluetooth 5.0+ has longer range (~200m). Used for audio, keyboards, IoT."},
+          {q:"802.11 vs cellular",a:"Wi-Fi = local wireless. Cellular = wide area via towers (LTE/5G).",d:"5G: sub-6 GHz (wide coverage) and mmWave (very fast, short range)."},
+          {q:"Lightning vs USB-C (Apple)",a:"Lightning = older Apple connector. USB-C = modern standard.",d:"iPhone 15+ and all modern iPads use USB-C. Older iPhones/iPods use Lightning."},
+          {q:"Screen digitiser",a:"Touch-sensitive layer above the display",d:"Detects finger capacitance. Separate from LCD. Cracks don't always affect touch."},
+          {q:"Battery calibration",a:"Charge to 100%, then use to 0%, then charge to 100%",d:"Helps OS accurately report battery percentage. Less needed with modern lithium batteries."},
+        ]
+      },
+      "power": {
+        title: "Power & Cooling",
+        icon: "⚡",
+        cards: [
+          {q:"ATX 24-pin connector",a:"Main motherboard power connector",d:"Provides 3.3V, 5V, and 12V rails. 20-pin + 4-pin add-on or solid 24-pin."},
+          {q:"CPU power connector",a:"4-pin or 8-pin EPS12V connector",d:"Separate from 24-pin. Powers CPU VRMs. High-end CPUs may need dual 8-pin."},
+          {q:"PCIe power connector",a:"6-pin or 8-pin for graphics cards",d:"Modern GPUs may need two 8-pin or new 16-pin (12VHPWR) connectors."},
+          {q:"SATA power connector",a:"15-pin L-shaped connector for drives",d:"Provides 3.3V, 5V, 12V to SATA drives. Replaces older Molex for drives."},
+          {q:"Molex connector",a:"4-pin legacy power connector",d:"Older 12V/5V connector. Still used for case fans and some legacy devices."},
+          {q:"PSU efficiency rating — 80 Plus",a:"80+, Bronze, Silver, Gold, Platinum, Titanium",d:"Gold = 87-90% efficient. Higher efficiency = less heat, lower electricity bills."},
+          {q:"UPS",a:"Uninterruptible Power Supply",d:"Battery backup that keeps equipment running during power outage. Also filters power."},
+          {q:"Surge protector vs UPS",a:"Surge protector: protects from spikes. UPS: protects + provides battery backup.",d:"Servers and workstations should have UPS. Home PCs at minimum a quality surge protector."},
+          {q:"CPU cooling — stock vs aftermarket",a:"Stock = included cooler, adequate. Aftermarket = better temps/noise.",d:"Tower coolers (e.g. Noctua) and liquid AIOs for higher TDP or OC."},
+          {q:"Thermal throttling",a:"CPU reduces clock speed to prevent overheating",d:"Caused by poor cooling, dust, dried thermal paste. Symptoms: sluggish PC, high CPU temp."},
+        ]
+      }
+    }
+  },
+  "core2": {
+    label: "Core 2",
+    color: "#5856d6",
+    bg: "rgba(88,86,214,0.12)",
+    icon: "🛡️",
+    topics: {
+      "windows-os": {
+        title: "Windows OS Tools",
+        icon: "🪟",
+        cards: [
+          {q:"msconfig",a:"System Configuration utility",d:"Manages startup programs, boot options, services. Quick way to enable safe mode or reduce startup items."},
+          {q:"msinfo32",a:"System Information tool",d:"Full hardware and OS summary. Useful for diagnostics. Includes IRQ, drivers, environment."},
+          {q:"devmgmt.msc",a:"Device Manager",d:"Manages hardware drivers, enables/disables devices, updates drivers, shows conflicts (yellow !)."},
+          {q:"eventvwr.msc",a:"Event Viewer",d:"View Windows logs: Application, System, Security. Critical for troubleshooting errors and crashes."},
+          {q:"compmgmt.msc",a:"Computer Management",d:"All-in-one console: Device Manager, Disk Management, Event Viewer, Services, Local Users."},
+          {q:"diskmgmt.msc",a:"Disk Management",d:"Create, format, resize partitions. Assign drive letters. Initialize new drives. Extend/shrink volumes."},
+          {q:"services.msc",a:"Services console",d:"Start/stop/configure Windows services. Set startup type: Automatic, Manual, Disabled."},
+          {q:"regedit",a:"Registry Editor",d:"Hierarchical database storing Windows config. HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER etc. Edit with caution."},
+          {q:"Task Manager shortcut",a:"Ctrl+Shift+Esc or Ctrl+Alt+Del → Task Manager",d:"View processes, CPU/RAM usage, startup items, network activity, open handles."},
+          {q:"cmd commands — ipconfig",a:"Shows IP address, subnet mask, default gateway",d:"ipconfig /all = MAC address, DNS. ipconfig /release and /renew = refresh DHCP lease."},
+          {q:"cmd — ping",a:"Tests connectivity to a host",d:"ping 8.8.8.8 tests internet. ping 127.0.0.1 tests local stack. Timeout = no response."},
+          {q:"cmd — tracert",a:"Traces route to destination showing each hop",d:"Shows where a connection fails or slows. tracert google.com. Uses ICMP TTL."},
+          {q:"cmd — nslookup",a:"Queries DNS servers",d:"nslookup google.com = resolves IP. nslookup 8.8.8.8 = reverse lookup."},
+          {q:"cmd — netstat",a:"Shows active network connections and listening ports",d:"netstat -an shows all. netstat -b shows which app. Useful for spotting malware connections."},
+          {q:"cmd — sfc /scannow",a:"System File Checker — scans and repairs protected Windows files",d:"Must run as Administrator. Replaces corrupted files from cached copy."},
+          {q:"cmd — DISM",a:"Deployment Image Servicing and Management",d:"DISM /Online /Cleanup-Image /RestoreHealth repairs the Windows image store used by SFC."},
+          {q:"cmd — chkdsk",a:"Checks disk for errors and bad sectors",d:"chkdsk /f fixes errors. /r also repairs bad sectors (requires reboot for C: drive)."},
+          {q:"cmd — gpupdate /force",a:"Forces Group Policy refresh",d:"gpresult /r shows applied policies. Used in domain environments to push settings."},
+          {q:"Windows Registry hives",a:"HKLM, HKCU, HKU, HKCR, HKCC",d:"HKLM = machine-wide. HKCU = current user. HKU = all users. HKCR = file associations."},
+          {q:"BitLocker",a:"Full-disk encryption built into Windows",d:"Uses AES 128/256. Requires TPM. Recovery key stored in AD or Microsoft account."},
+          {q:"Windows Defender / Microsoft Defender",a:"Built-in AV and threat protection",d:"Includes real-time protection, firewall, and EDR in enterprise (Defender for Endpoint)."},
+          {q:"Task Scheduler",a:"Automates tasks at set times or triggers",d:"Found in Computer Management or taskschd.msc. Common malware persistence method."},
+          {q:"Sysprep",a:"Prepares Windows for imaging/deployment",d:"Generalise option removes unique IDs. Used before capturing a master image with OOBE option."},
+          {q:"Windows Safe Mode",a:"Boots with minimal drivers — useful for troubleshooting",d:"F8 / Shift+F8 (older). Via msconfig or Settings > Recovery > Advanced Startup."},
+          {q:"winver",a:"Shows Windows version and build number",d:"Run from Win+R. Useful for confirming exact Windows 10/11 build in support scenarios."},
+        ]
+      },
+      "security-concepts": {
+        title: "Security Concepts",
+        icon: "🔐",
+        cards: [
+          {q:"CIA Triad",a:"Confidentiality, Integrity, Availability",d:"Core security model. Attacks target one or more of these three pillars."},
+          {q:"Authentication vs Authorisation",a:"AuthN = who are you? AuthZ = what can you do?",d:"Authentication verifies identity. Authorisation grants permissions after authentication."},
+          {q:"MFA",a:"Multi-Factor Authentication",d:"Requires 2+ of: something you know (password), have (token/phone), are (biometric)."},
+          {q:"Zero Trust model",a:"Never trust, always verify — no implicit trust based on network location",d:"Assumes breach. Verify every user and device every time, even on internal network."},
+          {q:"Principle of least privilege",a:"Users get only the minimum permissions needed",d:"Limits blast radius of compromised accounts. Admin accounts should not be used for daily tasks."},
+          {q:"Social engineering",a:"Manipulating people into divulging info or granting access",d:"Phishing, vishing, pretexting, tailgating. Human element is often weakest link."},
+          {q:"Phishing",a:"Fraudulent emails mimicking legitimate organisations",d:"Goal: steal credentials or install malware. Spear phishing = targeted. Whaling = executive targets."},
+          {q:"Vishing",a:"Voice phishing — phone calls impersonating tech support etc.",d:"Attacker calls claiming to be from IT/Microsoft/bank. Pressures victim to give credentials."},
+          {q:"Tailgating / piggybacking",a:"Following authorised person through secure door",d:"Physical social engineering. Counter: mantraps, security awareness, badge enforcement."},
+          {q:"Ransomware",a:"Malware that encrypts files and demands payment",d:"Spread via phishing, RDP exploits. Prevention: backups, patching, least privilege."},
+          {q:"Rootkit",a:"Malware that hides itself in the OS at a deep level",d:"May modify kernel. Hard to detect with standard AV. May require offline scan or OS reinstall."},
+          {q:"Keylogger",a:"Records keystrokes to capture passwords and sensitive data",d:"Can be software or hardware (USB dongle). Check for unknown USB devices on workstations."},
+          {q:"Spyware",a:"Software that secretly monitors and reports user activity",d:"Often bundled with free software. Check Task Manager and browser extensions."},
+          {q:"Adware",a:"Displays unwanted ads, often bundled with free software",d:"Not always malicious but intrusive. May also track browsing."},
+          {q:"Trojan",a:"Malware disguised as legitimate software",d:"Tricks user into installing. May open backdoor, steal data, or download other malware."},
+          {q:"Worm",a:"Self-replicating malware that spreads across networks",d:"No user interaction needed to spread. WannaCry was a famous worm. Patch networks!"},
+          {q:"Botnet",a:"Network of infected computers controlled remotely",d:"Used for DDoS attacks, spam, crypto mining. Command & Control (C2) server directs bots."},
+          {q:"DDoS",a:"Distributed Denial of Service — flooding target to make it unavailable",d:"Uses many compromised systems. Mitigated by CDN scrubbing, rate limiting, WAF."},
+          {q:"Man-in-the-Middle (MitM)",a:"Attacker intercepts communication between two parties",d:"ARP poisoning, rogue Wi-Fi hotspot. TLS/HTTPS prevents eavesdropping."},
+          {q:"SQL injection",a:"Inserting SQL code into input fields to manipulate database",d:"Input validation and parameterised queries prevent this. Common web vulnerability."},
+          {q:"XSS",a:"Cross-Site Scripting — injecting scripts into web pages",d:"Attacker's script runs in victim's browser. Steal cookies, hijack sessions."},
+          {q:"Encryption at rest vs in transit",a:"At rest = encrypted on storage. In transit = encrypted over network.",d:"BitLocker = at rest. HTTPS/TLS = in transit. Both needed for complete protection."},
+          {q:"Symmetric vs Asymmetric encryption",a:"Symmetric = same key. Asymmetric = public/private key pair.",d:"AES = symmetric (fast). RSA = asymmetric (slower, used for key exchange and signing)."},
+          {q:"PKI",a:"Public Key Infrastructure",d:"System of CAs, certificates, and keys that enables HTTPS and email signing."},
+          {q:"Digital certificate",a:"Binds a public key to an identity, signed by a CA",d:"Contains: subject, public key, issuer, validity period, signature. Browser trusts CA chain."},
+        ]
+      },
+      "security-hardening": {
+        title: "Security Hardening",
+        icon: "🔒",
+        cards: [
+          {q:"Default password changing",a:"First step after setting up any network device",d:"Default credentials are publicly known. Routers, switches, cameras all need changed passwords."},
+          {q:"Disable unused services/ports",a:"Reduces attack surface",d:"If a service isn't needed, disable it. Firewall should block unused ports."},
+          {q:"Patch management",a:"Keeping OS and software updated",d:"Most exploits target known vulnerabilities with available patches. WannaCry = unpatched EternalBlue."},
+          {q:"Application allow-listing",a:"Only approved applications can run",d:"Better than block-listing. Prevents unknown malware execution. AppLocker in Windows."},
+          {q:"UAC",a:"User Account Control",d:"Prompts for elevation when admin actions are needed. Prevents silent privilege escalation."},
+          {q:"NTFS permissions",a:"Read, Write, Execute, Modify, Full Control",d:"Set per user/group on files and folders. Inherited from parent by default. Effective permissions = most restrictive combination."},
+          {q:"Share permissions vs NTFS",a:"Share permissions apply when accessing over network. NTFS always.",d:"When both apply, effective permission = most restrictive of the two."},
+          {q:"EFS",a:"Encrypting File System",d:"NTFS feature. Encrypts individual files/folders tied to user account. Different from BitLocker."},
+          {q:"Firewall — host-based vs network",a:"Host: software on device. Network: hardware appliance between networks.",d:"Windows Defender Firewall = host-based. pfSense/Cisco = network firewall."},
+          {q:"Port forwarding",a:"Directs inbound traffic on a port to an internal IP/port",d:"Used for servers behind NAT. Security risk if over-used — only forward what's needed."},
+          {q:"DMZ",a:"Demilitarised Zone — network segment for public-facing servers",d:"Between internet and internal network. If web server is compromised, internal network protected."},
+          {q:"VPN",a:"Virtual Private Network — encrypted tunnel over internet",d:"Site-to-site: connects offices. Client-to-site: remote worker. Uses IPSec, OpenVPN, WireGuard."},
+          {q:"Secure boot",a:"UEFI feature — only boots signed OS bootloaders",d:"Prevents rootkits from loading before OS. Enabled by default on modern Windows PCs."},
+          {q:"TPM",a:"Trusted Platform Module",d:"Chip that stores encryption keys securely. Required for BitLocker and Windows 11. TPM 2.0 = current standard."},
+          {q:"Data destruction methods",a:"Overwrite, degauss, shred/destroy physically",d:"NIST 800-88 guidelines. SSDs should be cryptographically erased or physically destroyed."},
+        ]
+      },
+      "troubleshooting-methodology": {
+        title: "Troubleshooting Methodology",
+        icon: "🔧",
+        cards: [
+          {q:"CompTIA 6-step troubleshooting process — step 1",a:"Identify the problem",d:"Gather info: what changed, when it started, error messages, who reported it. Reproduce the issue."},
+          {q:"CompTIA 6-step — step 2",a:"Establish a theory of probable cause",d:"Consider the obvious first. Use elimination. OSI model top-down or bottom-up helps."},
+          {q:"CompTIA 6-step — step 3",a:"Test the theory",d:"If confirmed, move to plan. If not confirmed, establish new theory or escalate."},
+          {q:"CompTIA 6-step — step 4",a:"Establish a plan of action and implement",d:"Minimise impact. Plan for rollback. Communicate with users. Document steps."},
+          {q:"CompTIA 6-step — step 5",a:"Verify full system functionality",d:"Confirm fix works. Implement preventive measures. Verify with user."},
+          {q:"CompTIA 6-step — step 6",a:"Document findings, actions, and outcomes",d:"Record the problem, cause, and fix. Update ticketing system. Builds knowledge base."},
+          {q:"POST error — single beep",a:"Typically indicates successful POST (varies by BIOS vendor)",d:"AMI, Award, Phoenix beep codes differ. Check motherboard manual for specific codes."},
+          {q:"POST error — no beeps, no display",a:"Check power, RAM, GPU seating",d:"Try: reseat RAM one stick, clear CMOS, check GPU power connectors."},
+          {q:"Blue Screen of Death (BSOD)",a:"Windows kernel stop error — STOP code identifies cause",d:"Note the stop code. Common: IRQL_NOT_LESS_OR_EQUAL (driver), PAGE_FAULT_IN_NONPAGED_AREA (RAM)."},
+          {q:"Event ID 41",a:"Kernel Power — unexpected shutdown (e.g. power cut or crash)",d:"Often precedes BSOD. Check for power supply issues, overheating, or driver crashes."},
+          {q:"Safe Mode network troubleshooting",a:"Use safe mode to rule out third-party driver/software conflicts",d:"If problem disappears in safe mode, likely a startup service or driver causing the issue."},
+        ]
+      },
+      "networking-troubleshooting": {
+        title: "Network Troubleshooting",
+        icon: "🌐",
+        cards: [
+          {q:"No internet — first checks",a:"ipconfig → check IP. ping 127.0.0.1 → ping gateway → ping 8.8.8.8 → ping google.com",d:"If 127.0.0.1 fails: TCP/IP stack issue. If gateway fails: local network issue. If 8.8.8.8 works but google.com fails: DNS issue."},
+          {q:"APIPA address on workstation",a:"169.254.x.x means DHCP failed",d:"Check: cable connected, DHCP service running, port enabled on switch, IP address pool not exhausted."},
+          {q:"Duplicate IP address error",a:"Two devices assigned the same IP",d:"Windows shows 'IP address conflict'. Check DHCP scope, static IPs conflicting with DHCP range."},
+          {q:"Limited connectivity / no connectivity",a:"Network connected but no internet",d:"Check default gateway, DNS settings, and test with IP directly (rules out DNS vs routing)."},
+          {q:"Slow network speed",a:"Check: duplex mismatch, cable quality, interference, bandwidth saturation",d:"Run iperf or speedtest. Check switch port stats for errors. Cable test for signal quality."},
+          {q:"Wireless signal weak",a:"Move closer, check for interference, use 5GHz band",d:"2.4GHz better range. 5GHz better speed, shorter range. Microwaves and baby monitors interfere with 2.4GHz."},
+          {q:"Can ping IP but not hostname",a:"DNS resolution failure",d:"nslookup hostname. Check DNS server settings in ipconfig /all. Flush DNS: ipconfig /flushdns."},
+          {q:"WiFi connected but no internet",a:"Check DNS, default gateway, test with mobile hotspot",d:"Could be ISP outage, router config issue, or captive portal. Also check MAC filtering."},
+          {q:"RJ-45 cable tester",a:"Tests all 8 wires for continuity and correct wiring",d:"Shows opens, shorts, miswires. Can't test signal quality — use cable analyser for that."},
+          {q:"Loopback plug",a:"Tests NIC by sending traffic to itself",d:"Loops TX to RX pins. Confirms NIC transmits and receives. Useful for isolating NIC vs cable fault."},
+        ]
+      },
+      "linux-macos": {
+        title: "Linux & macOS",
+        icon: "🐧",
+        cards: [
+          {q:"Linux command — ls",a:"Lists directory contents",d:"ls -la = long format with hidden files. Similar to Windows dir command."},
+          {q:"Linux command — cd",a:"Changes directory",d:"cd / = root. cd ~ = home. cd .. = parent directory. Same concept as Windows."},
+          {q:"Linux command — pwd",a:"Print working directory — shows current path",d:"Useful when prompt doesn't show full path."},
+          {q:"Linux command — grep",a:"Searches text for patterns",d:"grep 'error' /var/log/syslog = finds lines with 'error'. Powerful for log analysis."},
+          {q:"Linux — sudo",a:"Superuser do — run command with elevated privileges",d:"sudo apt update. Like 'Run as administrator' in Windows."},
+          {q:"Linux — chmod",a:"Changes file permissions",d:"chmod 755 file = rwxr-xr-x. chmod +x = make executable. Numeric: 4=read, 2=write, 1=execute."},
+          {q:"Linux — chown",a:"Changes file ownership",d:"chown user:group file. Root typically owns system files."},
+          {q:"Linux — apt / yum / dnf",a:"Package managers for installing software",d:"apt = Debian/Ubuntu. yum/dnf = RHEL/Fedora/CentOS. Handles dependencies automatically."},
+          {q:"Linux — /etc/passwd",a:"User account database (no passwords in modern systems)",d:"Format: username:x:UID:GID:comment:home:shell. Passwords now in /etc/shadow (hashed)."},
+          {q:"macOS — Activity Monitor",a:"Equivalent to Windows Task Manager",d:"Shows CPU, memory, disk, network per process. Also shows Energy impact."},
+          {q:"macOS — Finder",a:"File manager, equivalent to Windows Explorer",d:"Go menu gives quick access to Applications, Downloads, Network, etc."},
+          {q:"macOS — Terminal",a:"Command-line interface — runs zsh (default since Catalina)",d:"Access via /Applications/Utilities/Terminal. Many Linux commands work in macOS Terminal."},
+          {q:"macOS Recovery Mode",a:"Command+R during boot for troubleshooting",d:"Access Disk Utility, reinstall macOS, restore from Time Machine, reset password."},
+          {q:"macOS — Time Machine",a:"Built-in backup system",d:"Hourly, daily, weekly backups to external drive or NAS. Easy file version recovery."},
+        ]
+      },
+      "operational-procedures": {
+        title: "Operational Procedures",
+        icon: "📋",
+        cards: [
+          {q:"ESD",a:"Electrostatic Discharge",d:"Static electricity can destroy components. Prevention: anti-static wrist strap, anti-static mat, avoid carpet."},
+          {q:"Anti-static wrist strap",a:"Connects technician to ground, preventing ESD",d:"Must be connected to ground (not just the case if unplugged). Do not wear near live circuits."},
+          {q:"Chain of custody",a:"Documentation of who handled evidence and when",d:"Critical in forensic investigations. Breaks in chain can make evidence inadmissible."},
+          {q:"Regulatory compliance — GDPR",a:"EU data protection regulation",d:"Requires lawful basis for data processing, right to erasure, data breach notification within 72 hours."},
+          {q:"PII",a:"Personally Identifiable Information",d:"Name, address, email, SSN, DOB, IP address. Must be protected by law in most jurisdictions."},
+          {q:"PHI",a:"Protected Health Information (HIPAA)",d:"Medical records, diagnoses, treatment info. Strict US laws govern storage and sharing."},
+          {q:"Incident response steps",a:"Identify → Contain → Eradicate → Recover → Document",d:"After recovery, post-incident review improves future response."},
+          {q:"Change management",a:"Formal process for making changes to IT systems",d:"Request → Approval → Test → Implement → Review. Prevents unplanned outages."},
+          {q:"SLA",a:"Service Level Agreement",d:"Defines expected service levels: uptime guarantees, response times, support hours."},
+          {q:"MSDS / SDS",a:"Material Safety Data Sheet / Safety Data Sheet",d:"Documents hazardous materials. Required by law. Covers disposal, handling, first aid."},
+          {q:"Ticketing system purpose",a:"Tracks IT issues from report to resolution",d:"Provides accountability, metrics, knowledge base. Common tools: Jira, ServiceNow, Zendesk."},
+          {q:"Data retention policy",a:"How long data must be kept before secure disposal",d:"Legal requirements vary by industry. Failure to follow can be a compliance violation."},
+          {q:"Proper battery disposal",a:"Never landfill — use certified e-waste/battery recycling",d:"Lithium batteries are a fire risk if punctured or improperly disposed of."},
+          {q:"Professionalism — customer communication",a:"Set expectations, explain clearly, follow up",d:"Avoid jargon with non-technical users. Give estimated resolution times. Document."},
+        ]
+      },
+      "virtualization-cloud": {
+        title: "Virtualisation & Cloud",
+        icon: "☁️",
+        cards: [
+          {q:"Hypervisor Type 1 (bare metal)",a:"Runs directly on hardware — no host OS",d:"Examples: VMware ESXi, Hyper-V (without GUI), Proxmox. More efficient, used in data centres."},
+          {q:"Hypervisor Type 2 (hosted)",a:"Runs on top of a host OS",d:"Examples: VirtualBox, VMware Workstation, Parallels. Easier to set up, less efficient."},
+          {q:"VM snapshot",a:"Point-in-time capture of VM state",d:"Allows rollback if update or change breaks something. Not a substitute for backups."},
+          {q:"IaaS",a:"Infrastructure as a Service",d:"Rent VMs, storage, networking. AWS EC2, Azure VMs. You manage the OS and up."},
+          {q:"PaaS",a:"Platform as a Service",d:"Rent platform to build on. Heroku, Azure App Service. Provider manages OS and runtime."},
+          {q:"SaaS",a:"Software as a Service",d:"Rent ready-to-use software. Gmail, Office 365, Salesforce. Provider manages everything."},
+          {q:"Public vs Private vs Hybrid cloud",a:"Public = shared (AWS). Private = dedicated. Hybrid = both.",d:"Hybrid allows sensitive data on private cloud while scaling to public."},
+          {q:"VDI",a:"Virtual Desktop Infrastructure",d:"Centrally hosted desktops streamed to thin clients. Easy management, requires good network."},
+          {q:"Container vs VM",a:"Container: shares OS kernel. VM: full OS per instance.",d:"Containers (Docker) are lightweight. VMs are fully isolated. Kubernetes orchestrates containers."},
+        ]
+      },
+      "acronyms": {
+        title: "Key Acronyms",
+        icon: "📝",
+        cards: [
+          {q:"ACL",a:"Access Control List",d:"List of permissions attached to a resource defining who can access it and how."},
+          {q:"AES",a:"Advanced Encryption Standard",d:"Symmetric encryption. 128/192/256-bit key sizes. Used in WPA2, BitLocker, TLS."},
+          {q:"BIOS",a:"Basic Input/Output System",d:"Firmware initialising hardware at startup. Legacy predecessor to UEFI."},
+          {q:"BYOD",a:"Bring Your Own Device",d:"Policy allowing personal devices on corporate networks."},
+          {q:"DNS",a:"Domain Name System",d:"Resolves human-readable names to IP addresses. Port 53."},
+          {q:"DoS / DDoS",a:"Denial of Service / Distributed DoS",d:"Attack making a resource unavailable. DDoS uses many attacking systems."},
+          {q:"ESD",a:"Electrostatic Discharge",d:"Static electricity that can damage sensitive electronics."},
+          {q:"FDE",a:"Full Disk Encryption",d:"Encrypts entire drive. BitLocker on Windows, FileVault on macOS."},
+          {q:"GPO",a:"Group Policy Object",d:"Configuration applied to users/computers in an Active Directory domain."},
+          {q:"HTTP / HTTPS",a:"HyperText Transfer Protocol / Secure",d:"Port 80 / 443. Foundation of web communication."},
+          {q:"IDS / IPS",a:"Intrusion Detection / Prevention System",d:"IDS detects and alerts. IPS detects and blocks. IPS is inline in traffic path."},
+          {q:"IP",a:"Internet Protocol",d:"Layer 3 addressing. IPv4 = 32-bit. IPv6 = 128-bit."},
+          {q:"IoT",a:"Internet of Things",d:"Smart devices connected to network: thermostats, cameras, sensors, medical devices."},
+          {q:"MAC",a:"Media Access Control address",d:"48-bit hardware address. Layer 2. First 24-bits = OUI (vendor)."},
+          {q:"MDM",a:"Mobile Device Management",d:"Centrally manage mobile devices: enforce policies, remote wipe, app management."},
+          {q:"MFA",a:"Multi-Factor Authentication",d:"Two or more authentication factors. Knowledge, possession, inherence."},
+          {q:"MSDS",a:"Material Safety Data Sheet",d:"Hazardous material documentation. Now called SDS in most regions."},
+          {q:"NAT",a:"Network Address Translation",d:"Maps private IPs to public IP. Performed by router/firewall."},
+          {q:"NFC",a:"Near Field Communication",d:"Short-range (4cm) wireless. Used for payments, access cards."},
+          {q:"NTFS",a:"New Technology File System",d:"Windows native filesystem. Supports permissions, encryption, large files."},
+          {q:"OEM",a:"Original Equipment Manufacturer",d:"Company that makes components sold under another brand. 'OEM Windows' = licence tied to hardware."},
+          {q:"OS",a:"Operating System",d:"Manages hardware resources and provides services to applications."},
+          {q:"PCI DSS",a:"Payment Card Industry Data Security Standard",d:"Standards for handling cardholder data. Required for any business accepting card payments."},
+          {q:"PII",a:"Personally Identifiable Information",d:"Data that can identify a person. Name, email, NI/SSN, address, IP."},
+          {q:"PKI",a:"Public Key Infrastructure",d:"Framework for managing digital certificates and public/private key pairs."},
+          {q:"RAM",a:"Random Access Memory",d:"Volatile fast storage for active processes. Lost on power off."},
+          {q:"RAID",a:"Redundant Array of Independent Disks",d:"Combines drives for redundancy or performance. RAID 0/1/5/10."},
+          {q:"RDP",a:"Remote Desktop Protocol",d:"Port 3389. Graphical remote access to Windows systems."},
+          {q:"ROM",a:"Read-Only Memory",d:"Non-volatile. Stores firmware. Modern uses: EEPROM, flash."},
+          {q:"SaaS",a:"Software as a Service",d:"Cloud-delivered software. Gmail, Office 365, Dropbox."},
+          {q:"SSID",a:"Service Set Identifier",d:"Wi-Fi network name. Broadcast by access point. Can be hidden."},
+          {q:"TCP",a:"Transmission Control Protocol",d:"Reliable, ordered, connection-oriented. Uses handshake and ACKs."},
+          {q:"TLS",a:"Transport Layer Security",d:"Successor to SSL. Encrypts data in transit. Used by HTTPS, email, VPN."},
+          {q:"TPM",a:"Trusted Platform Module",d:"Security chip for key storage, measured boot. Required for BitLocker and Windows 11."},
+          {q:"UAC",a:"User Account Control",d:"Windows feature prompting for elevation before privileged operations."},
+          {q:"UDP",a:"User Datagram Protocol",d:"Fast, connectionless, no delivery guarantee. Used for streaming, VoIP, DNS, DHCP."},
+          {q:"UEFI",a:"Unified Extensible Firmware Interface",d:"Modern BIOS replacement. Supports GPT, large drives, secure boot, GUI."},
+          {q:"VPN",a:"Virtual Private Network",d:"Encrypted tunnel over public network. Client-to-site or site-to-site."},
+          {q:"WPA2 / WPA3",a:"Wi-Fi Protected Access 2/3",d:"WPA2 uses AES/CCMP. WPA3 stronger, SAE handshake, harder to crack."},
+        ]
+      }
+    }
+  }
+};
+
+// ============================================================
+// SPACED REPETITION (simplified SM-2)
+// ============================================================
+const STORAGE_KEY = 'comptia_srs_v2';
+let progress = {};
+
+function loadProgress() {
+  try { progress = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { progress = {}; }
+}
+
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+}
+
+function getCardKey(coreId, topicId, idx) { return `${coreId}|${topicId}|${idx}`; }
+
+function getCardProgress(key) {
+  return progress[key] || { interval: 1, ease: 2.5, due: 0, reviews: 0, hard: 0 };
+}
+
+function rateCardSM2(key, rating) {
+  const now = Date.now();
+  const p = getCardProgress(key);
+  p.reviews++;
+  if (rating === 1) {
+    p.hard++;
+    p.interval = 1;
+    p.ease = Math.max(1.3, p.ease - 0.2);
+    p.due = now + 600000; // 10 min
+  } else if (rating === 3) {
+    p.interval = Math.max(1, Math.round(p.interval * p.ease * 0.8));
+    p.ease = Math.max(1.3, p.ease - 0.05);
+    p.due = now + p.interval * 86400000;
+  } else {
+    p.interval = Math.max(1, Math.round(p.interval * p.ease));
+    p.ease = Math.min(3.0, p.ease + 0.1);
+    p.due = now + p.interval * 86400000;
+  }
+  progress[key] = p;
+  saveProgress();
+}
+
+function isDue(key) {
+  const p = progress[key];
+  if (!p) return true;
+  return Date.now() >= p.due;
+}
+
+function isLearned(key) {
+  const p = progress[key];
+  return p && p.reviews > 0 && p.interval > 1;
+}
+
+// ============================================================
+// SESSION STATE
+// ============================================================
+let session = { cards: [], idx: 0, flipped: false, results: { easy: 0, ok: 0, hard: 0 }, backTarget: 'home', backLabel: 'Back', deckTitle: '' };
+
+// ============================================================
+// HOME / NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() { updateHome(); showScreen('home'); }
+
+function updateHome() {
+  let total = 0, learned = 0, due = 0;
+  for (const [coreId, core] of Object.entries(DECKS)) {
+    for (const [topicId, topic] of Object.entries(core.topics)) {
+      topic.cards.forEach((_, i) => {
+        const key = getCardKey(coreId, topicId, i);
+        total++;
+        if (isLearned(key)) learned++;
+        if (isDue(key)) due++;
+      });
+    }
+  }
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-learned').textContent = learned;
+  document.getElementById('stat-due').textContent = due;
+
+  ['core1', 'core2'].forEach(coreId => {
+    const core = DECKS[coreId];
+    const list = document.getElementById(coreId + '-list');
+    list.innerHTML = '';
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.onclick = () => showTopics(coreId);
+    let topicCount = Object.keys(core.topics).length;
+    let cardCount = Object.values(core.topics).reduce((a,t) => a + t.cards.length, 0);
+    let dueCount = 0, learnedCount = 0;
+    for (const [topicId, topic] of Object.entries(core.topics)) {
+      topic.cards.forEach((_, i) => {
+        const key = getCardKey(coreId, topicId, i);
+        if (isDue(key)) dueCount++;
+        if (isLearned(key)) learnedCount++;
+      });
+    }
+    const badge = dueCount > 0 ? `<span class="badge badge-due">${dueCount} due</span>` : `<span class="badge badge-done">✓ up to date</span>`;
+    item.innerHTML = `
+      <div class="item-icon" style="background:${core.bg};font-size:18px;">${core.icon}</div>
+      <div class="item-text">
+        <div class="item-title" style="color:${core.color};">${core.label} — ${coreId === 'core1' ? '220-1201' : '220-1202'}</div>
+        <div class="item-sub">${topicCount} topics · ${cardCount} cards · ${learnedCount} learned</div>
+      </div>
+      ${badge}
+      <span class="chevron">›</span>`;
+    list.appendChild(item);
+  });
+}
+
+function showTopics(coreId) {
+  const core = DECKS[coreId];
+  document.getElementById('topic-title').textContent = core.label;
+  const list = document.getElementById('topic-list');
+  list.innerHTML = '';
+  for (const [topicId, topic] of Object.entries(core.topics)) {
+    const total = topic.cards.length;
+    let dueCount = 0, learnedCount = 0;
+    topic.cards.forEach((_, i) => {
+      const key = getCardKey(coreId, topicId, i);
+      if (isDue(key)) dueCount++;
+      if (isLearned(key)) learnedCount++;
+    });
+    const pct = Math.round((learnedCount / total) * 100);
+    const card = document.createElement('div');
+    card.className = 'topic-card';
+    card.onclick = () => startDeck(coreId, topicId);
+    card.innerHTML = `
+      <div class="tc-icon" style="background:${core.bg};">${topic.icon}</div>
+      <div class="tc-text">
+        <div class="tc-title">${topic.title}</div>
+        <div class="tc-meta">${total} cards · ${learnedCount} learned · ${dueCount} due</div>
+      </div>
+      <div class="tc-right">
+        <svg class="progress-ring" viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="15" fill="none" stroke="var(--surface2)" stroke-width="3"/>
+          <circle cx="18" cy="18" r="15" fill="none" stroke="${core.color}" stroke-width="3"
+            stroke-dasharray="${Math.round(pct * 0.942)} 94.2"
+            stroke-linecap="round" transform="rotate(-90 18 18)"/>
+          <text x="18" y="22" text-anchor="middle" font-size="9" font-weight="600" fill="var(--text2)">${pct}%</text>
+        </svg>
+      </div>`;
+    list.appendChild(card);
+  }
+  session.backTarget = 'home';
+  session.backLabel = 'Home';
+  showScreen('topic');
+}
+
+function goBackFromCard() {
+  goHome();
+}
+
+// ============================================================
+// DECK LAUNCH
+// ============================================================
+function buildCardList(coreId, topicId) {
+  const topic = DECKS[coreId].topics[topicId];
+  return topic.cards.map((c, i) => ({ ...c, key: getCardKey(coreId, topicId, i), coreId, topicId, idx: i }));
+}
+
+function startDeck(coreId, topicId) {
+  const core = DECKS[coreId];
+  const topic = core.topics[topicId];
+  let cards = buildCardList(coreId, topicId).filter(c => isDue(c.key));
+  if (cards.length === 0) cards = buildCardList(coreId, topicId);
+  cards = shuffle(cards);
+  launchSession(cards, topic.title, 'home', 'Home');
+}
+
+function startAllDue() {
+  let cards = [];
+  for (const [coreId, core] of Object.entries(DECKS))
+    for (const [topicId] of Object.entries(core.topics))
+      cards.push(...buildCardList(coreId, topicId).filter(c => isDue(c.key)));
+  if (cards.length === 0) { alert('No cards due! Check back later or try Quick Drill.'); return; }
+  launchSession(shuffle(cards), 'Due cards', 'home', 'Home');
+}
+
+function startAllCards() {
+  let cards = [];
+  for (const [coreId, core] of Object.entries(DECKS))
+    for (const [topicId] of Object.entries(core.topics))
+      cards.push(...buildCardList(coreId, topicId));
+  launchSession(shuffle(cards), 'All cards', 'home', 'Home');
+}
+
+function showWeak() {
+  let cards = [];
+  for (const [coreId, core] of Object.entries(DECKS))
+    for (const [topicId] of Object.entries(core.topics))
+      cards.push(...buildCardList(coreId, topicId));
+  cards = cards.filter(c => (progress[c.key]?.hard || 0) > 0);
+  cards.sort((a, b) => (progress[b.key]?.hard || 0) - (progress[a.key]?.hard || 0));
+  cards = cards.slice(0, 30);
+  if (cards.length === 0) { alert('No missed cards yet! Study some decks first.'); return; }
+  launchSession(cards, 'Weak cards', 'home', 'Home');
+}
+
+function resetAllProgress() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  progress = {};
+  saveProgress();
+  updateHome();
+  alert('Progress reset.');
+}
+
+function launchSession(cards, title, backTarget, backLabel) {
+  session = { cards, idx: 0, flipped: false, results: { easy: 0, ok: 0, hard: 0 }, backTarget, backLabel, deckTitle: title };
+  document.getElementById('card-back-label').textContent = backLabel;
+  document.getElementById('card-deck-title').textContent = title;
+  renderCard();
+  showScreen('card');
+}
+
+// ============================================================
+// FLASHCARD INTERACTION
+// ============================================================
+function renderCard() {
+  const { cards, idx } = session;
+  if (idx >= cards.length) { showDone(); return; }
+  const card = cards[idx];
+  session.flipped = false;
+  document.getElementById('card-inner').classList.remove('flipped');
+  document.getElementById('card-q').textContent = card.q;
+  document.getElementById('card-a').textContent = card.a;
+  document.getElementById('card-d').textContent = card.d || '';
+  document.getElementById('card-counter').textContent = `Card ${idx + 1} of ${cards.length}`;
+  document.getElementById('progress-fill').style.width = `${Math.round(((idx) / cards.length) * 100)}%`;
+  document.getElementById('rating-buttons').className = 'rating-buttons rating-hidden';
+}
+
+function flipCard() {
+  if (session.flipped) return;
+  session.flipped = true;
+  document.getElementById('card-inner').classList.add('flipped');
+  document.getElementById('rating-buttons').className = 'rating-buttons';
+}
+
+function rateCard(rating) {
+  const card = session.cards[session.idx];
+  rateCardSM2(card.key, rating);
+  if (rating === 1) session.results.hard++;
+  else if (rating === 3) session.results.ok++;
+  else session.results.easy++;
+  session.idx++;
+  renderCard();
+}
+
+// ============================================================
+// DONE SCREEN
+// ============================================================
+function showDone() {
+  const { results, cards } = session;
+  const total = results.easy + results.ok + results.hard;
+  const pct = total > 0 ? Math.round((results.easy / total) * 100) : 0;
+  const titles = ['Keep going!', 'Good work!', 'Nice job!', 'Brilliant!', 'You legend!'];
+  document.getElementById('done-title').textContent = titles[Math.min(4, Math.floor(pct / 25))];
+  document.getElementById('done-sub').textContent = `${pct}% rated easy. ${results.hard > 0 ? `${results.hard} hard card${results.hard>1?'s':''} will appear again soon.` : 'Great session!'}`;
+  document.getElementById('done-easy').textContent = results.easy;
+  document.getElementById('done-ok').textContent = results.ok;
+  document.getElementById('done-hard').textContent = results.hard;
+  document.getElementById('done-total-s').textContent = total;
+  const btn = document.getElementById('done-again-btn');
+  const missed = session.cards.filter(c => (progress[c.key]?.hard || 0) > 0 && isDue(c.key));
+  btn.style.display = missed.length > 0 ? 'block' : 'none';
+  showScreen('done');
+}
+
+function repeatMissed() {
+  const missed = shuffle(session.cards.filter(c => isDue(c.key)));
+  if (missed.length === 0) { goHome(); return; }
+  launchSession(missed, 'Missed cards', 'home', 'Home');
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadProgress();
+updateHome();
+</script>
+</body>
+</html>
